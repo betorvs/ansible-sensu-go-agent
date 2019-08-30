@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  remote_user: root
+  vars: 
+    sensuGo_plugin_http: true
+  roles:
+    - ansible-sensu-go-agent

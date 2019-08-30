@@ -1,0 +1,82 @@
+---
+
+# Add the sensuGo plugins repository
+- name: Adding sensuGo-plugins repository
+  get_url:
+    url: "{{ item }}"
+    dest: "/etc/apt/sources.list.d/sensu_community.list"
+  with_items:
+    - "{{ sensuGo_plugins_repo }}"
+
+# Add gpgkey
+- name: Add SensuGo-plugins repository key
+  apt_key:
+    url: "{{ sensuGo_plugins_gpgkey }}"
+    state: present
+
+- name: install sensu-plugins from packagecloud.io and dependencies
+  apt:
+    name:
+      - sensu-plugins-ruby
+      - make
+      - gcc
+      - g++
+    state: present
+    update_cache: yes
+
+# - name: Install gem required
+#   shell: "/opt/sensu-plugins-ruby/embedded/bin/gem install mixlib-cli:1.7.0"
+
+- name: Install Sensu Plugins
+  command: creates="{{item.check}}" /opt/sensu-plugins-ruby/bin/sensu-install -p {{ item.name }}
+  with_items:
+    - {name: disk-checks, check: "{{sensuGo_plugins_bin_path}}/check-disk-usage.rb"}
+    - {name: memory-checks, check: "{{sensuGo_plugins_bin_path}}/check-memory-percent.rb" }
+    - {name: load-checks, check: "{{sensuGo_plugins_bin_path}}/check-load.rb" }
+    - {name: filesystem-checks, check: "{{sensuGo_plugins_bin_path}}/check-fs-writable.rb" }
+    - {name: cpu-checks, check: "{{sensuGo_plugins_bin_path}}/check-cpu.rb" }
+
+- name: Install plugin for elasticsearch
+  command: creates="{{item.check}}" /opt/sensu-plugins-ruby/bin/sensu-install -p {{ item.name }}
+  with_items:
+    - {name: elasticsearch, check: "{{sensuGo_plugins_bin_path}}/check-es-cluster-status.rb" }
+  when: sensuGo_plugin_elasticsearch == true
+
+- name: Install plugin for http
+  command: creates="{{item.check}}" /opt/sensu-plugins-ruby/bin/sensu-install -p {{ item.name }}
+  with_items:
+    - {name: http, check: "{{sensuGo_plugins_bin_path}}/check-http.rb" }
+  when: sensuGo_plugin_http == true
+
+- name: Install plugin for kubernetes
+  command: creates="{{item.check}}" /opt/sensu-plugins-ruby/bin/sensu-install -p {{ item.name }}
+  with_items:
+    - {name: kubernetes, check: "{{sensuGo_plugins_bin_path}}/check-kube-apiserver-available.rb" }
+  when: sensuGo_plugin_k8s == true
+
+- name: Install plugin for rabbitmq
+  command: creates="{{item.check}}" /opt/sensu-plugins-ruby/bin/sensu-install -p {{ item.name }}
+  with_items:
+    - {name: rabbitmq, check: "{{sensuGo_plugins_bin_path}}/check-rabbitmq-cluster-health.rb" }
+  when: sensuGo_plugin_rabbitmq == true
+
+- name: Install plugin for redis
+  command: creates="{{item.check}}" /opt/sensu-plugins-ruby/bin/sensu-install -p {{ item.name }}
+  with_items:
+    - {name: redis, check: "{{sensuGo_plugins_bin_path}}/check-redis-ping.rb" }
+  when: sensuGo_plugin_redis == true
+
+- name: Install plugin for mysql
+  command: creates="{{item.check}}" /opt/sensu-plugins-ruby/bin/sensu-install -p {{ item.name }}
+  with_items:
+    - {name: mysql, check: "{{sensuGo_plugins_bin_path}}/check-mysql-alive.rb" }
+  when: sensuGo_plugin_mysql == true
+
+- name: Script to clean docker in gitlab-runners
+  template:
+    src: clean-docker-dir.sh.j2
+    dest: /opt/sensu-plugins-ruby/bin/clean-docker-dir.sh
+    owner: "sensu"
+    group: "sensu"
+    mode: 0755
+  when: sensuGo_clean_docker == true

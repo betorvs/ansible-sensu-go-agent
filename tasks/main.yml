@@ -1,0 +1,12 @@
+---
+# tasks file for sensu-agent
+
+
+- include_tasks: prerequisite.yml
+  when: (ansible_distribution == 'Debian' and ansible_facts['distribution_major_version'] == "8" ) or ( ansible_distribution == 'Ubuntu' and ansible_facts['distribution_major_version'] >= "14" )
+
+- include_tasks: install_sensuGo_agent.yml
+  when: (ansible_distribution == 'Debian' and ansible_facts['distribution_major_version'] == "8" ) or ( ansible_distribution == 'Ubuntu' and ansible_facts['distribution_major_version'] >= "14" )
+
+- include_tasks: plugins.yml
+  when: (ansible_distribution == 'Debian' and ansible_facts['distribution_major_version'] == "8" ) or ( ansible_distribution == 'Ubuntu' and ansible_facts['distribution_major_version'] >= "14" )

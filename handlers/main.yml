@@ -1,0 +1,10 @@
+---
+# handlers file for ansible-sensu-go-agent
+
+- name: sensuGo-agent restart
+  become: 'yes'
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - sensu-agent

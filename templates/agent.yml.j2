@@ -1,0 +1,19 @@
+---
+backend-url:
+{% if sensuGo_ssl %}
+  - "wss://{{ sensuGo_backend_url }}:8081"
+{% else %}
+  - "ws://{{ sensuGo_backend_url }}:8081"
+{% endif %}
+deregister: false
+namespace: "{{ sensuGo_namespace }}"
+{% if sensuGo_subscriptions_active %}
+subscriptions:
+{% for sub in sensuGo_subscriptions %}
+  - "{{ sub }}"
+{% endfor %}
+{% endif %}
+{% for key, value in sensuGo_labels.items() %}
+labels:
+  {{ key }}: {{ value }}
+{% endfor %}

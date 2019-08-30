@@ -1,0 +1,10 @@
+---
+- name: Ensure prerequite packages are installed
+  become: 'yes'
+  apt:
+    name:
+      - apt-transport-https
+      - curl
+      - gnupg
+    state: latest
+    update_cache: yes

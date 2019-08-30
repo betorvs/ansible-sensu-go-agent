@@ -1,0 +1,11 @@
+#!/bin/bash
+
+  echo "\ncleaning stopped process"
+  /usr/bin/sudo -n /usr/bin/docker rm $(/usr/bin/sudo -n /usr/bin/docker ps -a | grep Exited | awk '{ print $1 }' )
+  echo "\ncleaning docker volumes"
+  /usr/bin/sudo -n /usr/bin/docker volume rm $(/usr/bin/sudo -n /usr/bin/docker volume ls -qf dangling=true )
+  echo "\ncleaning old images"
+  /usr/bin/sudo -n /usr/bin/docker rmi $( /usr/bin/sudo -n /usr/bin/docker images -aq )
+  echo "\nrunning docker prune"
+  /usr/bin/sudo -n /usr/bin/docker system prune -f --all
+
